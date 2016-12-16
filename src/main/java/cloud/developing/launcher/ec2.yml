@@ -1,0 +1,30 @@
+Parameters:
+  imageId:
+    Default: ami-a66221ce
+    Type: String
+  iamInstanceRole:
+    Default: jee-role
+    Type: String
+  instanceType:
+    Default: t2.micro
+    Type: String
+  securityGroup:
+    Default: adamsmolnik.com
+    Type: String
+  keyName:
+    Default: adamsmolnik-net-key-pair
+    Type: String
+Resources:
+  myEc2:
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: !Ref imageId
+      IamInstanceProfile: !Ref iamInstanceRole
+      InstanceType: !Ref instanceType
+      KeyName: !Ref keyName
+      SecurityGroups: [!Ref securityGroup]
+      Tags:
+        - Key: Name
+          Value: ec2-student000-from-cf
+        - Key: owner
+          Value: "000"

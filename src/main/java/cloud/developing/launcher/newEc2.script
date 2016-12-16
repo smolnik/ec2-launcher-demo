@@ -1,0 +1,2 @@
+for /f %i in ('aws ec2 run-instances --profile student --region us-east-1 --image-id ami-a66221ce --count 1 --instance-type t2.micro --key-name adamsmolnik-net-key-pair --security-groups adamsmolnik.com --iam-instance-profile "Name=jee-role" --output text --query "Instances[*].InstanceId"') do set instanceId=%i
+aws ec2 create-tags --profile student --region us-east-1 --resources %instanceId% --tags Key=Name,Value=ec2-student000-from-cli Key=owner,Value=000
