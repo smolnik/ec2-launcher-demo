@@ -9,7 +9,6 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.IamInstanceProfileSpecification;
-import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.Tag;
@@ -28,19 +27,20 @@ public class Ec2Launcher {
 				.withMaxCount(1).withKeyName("adamsmolnik-net-key-pair").withSecurityGroups("adamsmolnik.com")
 				.withIamInstanceProfile(new IamInstanceProfileSpecification().withName("jee-role"));
 		RunInstancesResult result = ec2.runInstances(request);
-		Instance instance = result.getReservation().getInstances().get(0);
-
-		List<Tag> tags = new ArrayList<>();
-		tags.add(new Tag().withKey("Name").withValue("ec2-student000-from-java"));
-		tags.add(new Tag().withKey("owner").withValue("000"));
-		CreateTagsRequest ctr = new CreateTagsRequest();
-		ctr.setTags(tags);
-		ctr.withResources(instance.getInstanceId());
-		ec2.createTags(ctr);
-		System.out.println("waiting to get a new ec2 up and running...");
-		Waiter<DescribeInstancesRequest> waiter = ec2.waiters().instanceRunning();
-		waiter.run(new WaiterParameters<>(new DescribeInstancesRequest().withInstanceIds(instance.getInstanceId())));
-		System.out.println("now up and running");
+		result.getReservation().getInstances().forEach(instance -> {
+			String instanceId = instance.getInstanceId();
+			List<Tag> tags = new ArrayList<>();
+			tags.add(new Tag().withKey("Name").withValue("ec2-student000-from-java"));
+			tags.add(new Tag().withKey("owner").withValue("000"));
+			CreateTagsRequest ctr = new CreateTagsRequest();
+			ctr.setTags(tags);
+			ctr.withResources(instanceId);
+			ec2.createTags(ctr);
+			System.out.println("waiting to get a new ec2 of id: " + instanceId + " up and running...");
+			Waiter<DescribeInstancesRequest> waiter = ec2.waiters().instanceRunning();
+			waiter.run(new WaiterParameters<>(new DescribeInstancesRequest().withInstanceIds(instance.getInstanceId())));
+			System.out.println("now ec2 of id: " + instanceId + " up and running");
+		});
 	}
 
 }
